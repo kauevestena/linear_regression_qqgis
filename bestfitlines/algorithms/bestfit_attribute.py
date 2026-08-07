@@ -19,10 +19,7 @@ from qgis.core import (
 )
 import numpy as np
 
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from core.math_utils import (
+from ..core.math_utils import (
     total_least_squares,
     compute_extreme_projections,
     compute_residuals,
@@ -96,7 +93,8 @@ class BestFitAttributeAlgorithm(QgsProcessingAlgorithm):
                 self.tr('Sigma X Field (Overrides Global)'),
                 optional=True,
                 type=QgsProcessingParameterField.Numeric,
-                parentLayerParameterName=self.INPUT
+                parentLayerParameterName=self.INPUT,
+                defaultValue='sigmaX'
             )
         )
 
@@ -106,7 +104,8 @@ class BestFitAttributeAlgorithm(QgsProcessingAlgorithm):
                 self.tr('Sigma Y Field (Overrides Global)'),
                 optional=True,
                 type=QgsProcessingParameterField.Numeric,
-                parentLayerParameterName=self.INPUT
+                parentLayerParameterName=self.INPUT,
+                defaultValue='sigmaY'
             )
         )
 
@@ -290,9 +289,9 @@ class BestFitAttributeAlgorithm(QgsProcessingAlgorithm):
             feedback.setProgress(int((i + 1) / total_groups * 50))
 
         # Write points
-        features = list(source.getFeatures())
-        total = len(features) if len(features) > 0 else 1
-        for current, f in enumerate(features):
+        feat_count = source.featureCount()
+        total = feat_count if feat_count > 0 else 1
+        for current, f in enumerate(source.getFeatures()):
             if feedback.isCanceled():
                 break
 

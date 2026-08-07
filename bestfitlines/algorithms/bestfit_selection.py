@@ -19,10 +19,7 @@ from qgis.core import (
 )
 import numpy as np
 
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from core.math_utils import (
+from ..core.math_utils import (
     total_least_squares,
     compute_extreme_projections,
     compute_residuals,
@@ -87,7 +84,8 @@ class BestFitSelectionAlgorithm(QgsProcessingAlgorithm):
                 self.tr('Sigma X Field (Overrides Global)'),
                 optional=True,
                 type=QgsProcessingParameterField.Numeric,
-                parentLayerParameterName=self.INPUT
+                parentLayerParameterName=self.INPUT,
+                defaultValue='sigmaX'
             )
         )
 
@@ -97,7 +95,8 @@ class BestFitSelectionAlgorithm(QgsProcessingAlgorithm):
                 self.tr('Sigma Y Field (Overrides Global)'),
                 optional=True,
                 type=QgsProcessingParameterField.Numeric,
-                parentLayerParameterName=self.INPUT
+                parentLayerParameterName=self.INPUT,
+                defaultValue='sigmaY'
             )
         )
 
@@ -159,12 +158,12 @@ class BestFitSelectionAlgorithm(QgsProcessingAlgorithm):
             source.sourceCrs()
         )
 
-        features = list(source.getFeatures())
-        total = 100.0 / (len(features) if len(features) > 0 else 1)
-
-        if len(features) < 2:
+        feat_count = source.featureCount()
+        if feat_count >= 0 and feat_count < 2:
             feedback.pushInfo("Less than 2 points provided. Skipping line generation.")
             return {self.OUTPUT_LINE: dest_id_line, self.OUTPUT_POINTS: dest_id_points}
+
+        total = 100.0 / (feat_count if feat_count > 0 else 1)
 
         x_coords = []
         y_coords = []
@@ -172,7 +171,7 @@ class BestFitSelectionAlgorithm(QgsProcessingAlgorithm):
         sigmas_y = []
         feat_ids = []
 
-        for current, f in enumerate(features):
+        for current, f in enumerate(source.getFeatures()):
             if feedback.isCanceled():
                 break
 
@@ -240,7 +239,7 @@ class BestFitSelectionAlgorithm(QgsProcessingAlgorithm):
 
         # Write Points with Residuals
         id_to_res = {fid: res for fid, res in zip(feat_ids, residuals)}
-        for current, f in enumerate(features):
+        for current, f in enumerate(source.getFeatures()):
             if feedback.isCanceled():
                 break
 
