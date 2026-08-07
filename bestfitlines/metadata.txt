@@ -1,0 +1,12 @@
+[general]
+name=bestfitlines
+qgisMinimumVersion=3.28
+description=Estimate best fitting lines (using Total Least Squares) from a set of XY points from a point layer.
+version=1.0
+author=Jules
+email=jules@example.com
+about=Estimate best fitting lines from a set of XY points. Computes coefficients, r2 and chi-squared test metrics.
+tracker=
+repository=
+category=Vector
+tags=processing,geometry,bestfit,lines,regression,tls
