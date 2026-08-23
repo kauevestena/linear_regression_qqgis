@@ -1,63 +1,85 @@
-# Best Fit Lines - QGIS Processing Plugin
+# TopoALign - QGIS Processing Plugin
 
-A QGIS Processing Provider Plugin to estimate best fitting lines from a set of XY points using **Total Least Squares (Orthogonal Distance Regression)**.
+**TopoALign** is a bilingual (English / Portuguese) QGIS Processing Provider Plugin providing topographic alignment analysis and 2D coordinate transformation tools.
 
-This plugin is designed to be fully compatible with QGIS 3.28+ and ready for QGIS 4 APIs. The core mathematical logic is implemented entirely in NumPy.
+Fully compatible with **QGIS 3.28+** and ready for **QGIS 4.x** APIs. Core mathematical calculations are implemented entirely in pure NumPy for optimal speed and reliability.
 
-## Features
+---
 
-This plugin provides a processing provider ("Best Fit") with two algorithms:
+## 🌐 Bilingual Support (i18n)
 
-1. **Best Fit Line (All/Selection)**
-   - Computes a single best fit line for the selected points (or all points in a layer).
-   - Returns a Line layer with mathematical attributes.
-   - Returns a new Point layer with the calculated orthogonal `residual` appended.
+TopoALign includes full native internationalization for both **English (en)** and **Portuguese (pt-BR / pt)**. The user interface (tool names, groups, parameters, descriptions, log messages) automatically adapts to your QGIS locale settings.
 
-2. **Best Fit Lines (By Attribute)**
-   - Groups points by a specified attribute and computes a best fit line for each group.
-   - Automatically detects common attribute names (e.g., `linha`, `alinhamento`, `line`, `alignment`).
-   - Returns a Line layer containing all the computed lines.
-   - Returns a Point layer with residuals for all points.
+---
 
-## Attributes and Output
+## 🛠️ Algorithm Sections & Features
 
-For each line generated, the following attributes are populated:
+TopoALign organizes tools into two main processing sections:
 
-*   **A, B, C**: Coefficients for the general line equation $Ax + By + C = 0$. (Normalized such that $A^2 + B^2 = 1$).
-*   **a_slope, b_inter**: Coefficients for the slope-intercept form $y = ax + b$. `NULL` if the line is perfectly vertical.
-*   **r2_tls**: R-squared statistic specifically calculated for TLS using eigenvalues.
-*   **chi2_stat**: The Chi-squared statistic based on the orthogonal residuals and provided standard errors.
-*   **chi2_pass**: Boolean indicating if the fit passes the 95% confidence interval for the Chi-squared test.
+### 1. Best Fit (`Melhor Ajuste` / `best_fit`)
 
-### Standard Errors
+Tools for estimating best-fitting lines from sets of points using **Total Least Squares (TLS / Orthogonal Distance Regression)**:
 
-Users can provide standard errors via:
-1.  **Global Standard Error (Sigma)**: A single value applied to all points.
-2.  **Sigma X / Sigma Y Fields**: Field names in the point layer to use for individual standard errors (overrides the global sigma).
+*   **Best Fit Line (All/Selection)** (`bestfitselection` / `Linha de Melhor Ajuste (Tudo/Seleção)`)
+    *   Computes a single best-fit line for selected points or all points in a layer.
+    *   Outputs a Line layer with general ($Ax + By + C = 0$) and slope-intercept ($y = ax + b$) parameters, $R^2_{TLS}$, and $\chi^2$ test metrics.
+    *   Outputs a Point layer with calculated orthogonal residuals appended.
 
-## Installation
+*   **Best Fit Lines (By Attribute)** (`bestfitattribute` / `Linhas de Melhor Ajuste (Por Atributo)`)
+    *   Groups points by a specified attribute and computes TLS best-fit lines for each group.
+    *   Auto-detects common grouping field names (e.g., `linha`, `alinhamento`, `line`, `alignment`).
+    *   Outputs aggregated lines and points with residuals.
 
-You can install this plugin manually in QGIS by copying the `bestfitlines` folder into your QGIS profiles plugin directory:
+#### Attributes & Statistics Generated:
+*   **A, B, C**: General line coefficients ($Ax + By + C = 0$, normalized $A^2 + B^2 = 1$).
+*   **a_slope, b_inter**: Slope and Y-intercept for $y = ax + b$ (`NULL` for vertical lines).
+*   **r2_tls**: Total Least Squares $R^2$ calculated from covariance eigenvalues.
+*   **chi2_stat**: Chi-squared goodness-of-fit test statistic.
+*   **chi2_pass**: Boolean indicating if fit satisfies 95% confidence interval ($\alpha = 0.05$).
 
-*   **Windows:** `%APPDATA%\QGIS\QGIS3\profiles\default\python\plugins\`
-*   **Linux:** `~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/`
-*   **macOS:** `~/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins/`
+---
 
-## Development and Testing
+### 2. Transform (`Transformar` / `transform`)
 
-The core math utilities are built strictly on NumPy and are designed to be tested independently of QGIS.
+Coordinate and alignment transformation tools:
 
-### Running Tests
+*   **2D Helmert Transformation** (`helmert2d` / `Transformação 2D de Helmert`)
+    *   Estimates 4-parameter conformal transformation ($T_x, T_y$, scale $s$, rotation $\theta$) from source and target control point pairs using Least Squares, or applies manual parameters.
+    *   Transforms input geometries (points, lines, polygons) and computes RMSE and point residuals ($V_x, V_y, V_{dist}$).
 
-Dependencies for testing:
+*   **Station and Offset (Alignment Transformation)** (`stationoffset` / `Estaqueamento e Afastamento`)
+    *   Projects points onto a reference alignment / baseline polyline.
+    *   Computes cumulative chainage/station ($s$), station number (e.g., `Estaca`), plus distance ($+m$), and signed transverse offset ($d$, positive for right side, negative for left side).
+    *   Outputs points with station attributes and optionally generates projected point geometries along the alignment.
+
+---
+
+## 📦 Installation
+
+Copy or symlink the `topoalign` folder into your QGIS plugin directory:
+
+*   **Linux:** `~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/topoalign`
+*   **Windows:** `%APPDATA%\QGIS\QGIS3\profiles\default\python\plugins\topoalign`
+*   **macOS:** `~/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins/topoalign`
+
+Enable **TopoALign** in QGIS via **Plugins > Manage and Install Plugins... > Installed**.
+
+---
+
+## 🧪 Testing & Development
+
+Run unit tests directly with `pytest`:
+
 ```bash
-pip install numpy pytest
+# Run all tests
+python3 -m pytest topoalign/tests/
+
+# Recompile translation binaries (.qm)
+lrelease topoalign/i18n/*.ts
 ```
 
-Run the tests from the root of the repository:
-```bash
-python3 -m pytest bestfitlines/tests/
-```
+---
 
-## License
+## 📄 License
 MIT License
+

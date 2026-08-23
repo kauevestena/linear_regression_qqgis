@@ -19,12 +19,23 @@ from qgis.core import (
 )
 import numpy as np
 
-from ..core.math_utils import (
-    total_least_squares,
-    compute_extreme_projections,
-    compute_residuals,
-    chi_squared_test
-)
+try:
+    from ..core.i18n_utils import tr
+    from ..core.math_utils import (
+        total_least_squares,
+        compute_extreme_projections,
+        compute_residuals,
+        chi_squared_test
+    )
+except (ImportError, ValueError):
+    from core.i18n_utils import tr
+    from core.math_utils import (
+        total_least_squares,
+        compute_extreme_projections,
+        compute_residuals,
+        chi_squared_test
+    )
+
 
 class BestFitSelectionAlgorithm(QgsProcessingAlgorithm):
     """
@@ -39,7 +50,7 @@ class BestFitSelectionAlgorithm(QgsProcessingAlgorithm):
     SIGMA_Y_FIELD = 'SIGMA_Y_FIELD'
 
     def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
+        return tr(string, context='TopoALign')
 
     def createInstance(self):
         return BestFitSelectionAlgorithm()
@@ -54,7 +65,8 @@ class BestFitSelectionAlgorithm(QgsProcessingAlgorithm):
         return self.tr('Best Fit')
 
     def groupId(self):
-        return 'bestfit'
+        return 'best_fit'
+
 
     def shortHelpString(self):
         return self.tr("Estimates a best fitting line using Total Least Squares for a set of points.")

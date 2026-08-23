@@ -1,12 +1,14 @@
 [general]
-name=bestfitlines
+name=TopoALign
 qgisMinimumVersion=3.28
-description=Estimate best fitting lines (using Total Least Squares) from a set of XY points from a point layer.
-version=1.0
-author=Jules
-email=jules@example.com
-about=Estimate best fitting lines from a set of XY points. Computes coefficients, r2 and chi-squared test metrics.
-tracker=
-repository=
+qgisMaximumVersion=4.99
+description=Topographic alignment and coordinate transformation tools: Total Least Squares best-fit lines and 2D/alignment transformations (Bilingual: EN / PT-BR).
+version=0.1.0
+author=TopoALign Contributors
+email=kauevestena@gmail.com
+about=Estimate best fitting lines (TLS, R², Chi²) and perform 2D coordinate transformations (Helmert, Station/Offset) for survey and alignment workflows.
+tracker=https://github.com/kauevestena/linear_regression_qqgis/issues
+repository=https://github.com/kauevestena/linear_regression_qqgis
 category=Vector
-tags=processing,geometry,bestfit,lines,regression,tls
+tags=processing,geometry,bestfit,lines,regression,tls,transform,helmert,station,offset,survey,topography,topoalign
+
